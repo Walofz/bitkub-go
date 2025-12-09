@@ -1,6 +1,7 @@
 services:
   bitkub-bot:
     build: .
+    container_name: bitkub-bot
     env_file:
       - .env
     ports:
