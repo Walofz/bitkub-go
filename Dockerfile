@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
 # Stage 1: Builder - ใช้สำหรับคอมไพล์โค้ด Go เท่านั้น
 # ----------------------------------------------------------------------
-FROM golang:1.21-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 ENV CGO_ENABLED=1
 ENV GOOS=linux
