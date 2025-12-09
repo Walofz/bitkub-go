@@ -105,3 +105,40 @@ func sendToDiscord(payload map[string]interface{}) {
 		defer resp.Body.Close()
 	}()
 }
+
+// ---------------------------------------------------------
+// 3. แจ้งเตือนเมื่อมีการสลับโหมด (Mode Change) 🌟 NEW
+// ---------------------------------------------------------
+func SendDiscordModeChange(isDryRun bool) {
+	if DiscordWebhookURL == "" {
+		return
+	}
+
+	title := "🔄 Bot Mode Changed"
+	description := "เปลี่ยนโหมดเป็น **PRODUCTION** (เริ่มใช้งานเงินจริง) 💸"
+	color := 0x00ff00
+
+	if isDryRun {
+		description = "เปลี่ยนโหมดเป็น **DRY RUN** (จำลองการเทรด) 🧪"
+		color = 0xffa500
+	}
+
+	payload := map[string]interface{}{
+		"username": "Bitkub Bot",
+		"embeds": []map[string]interface{}{
+			{
+				"title":       title,
+				"description": description,
+				"color":       color,
+				"fields": []map[string]interface{}{
+					{"name": "Time", "value": time.Now().Format("15:04:05 02/01/2006"), "inline": false},
+				},
+				"footer": map[string]interface{}{
+					"text": "Bitkub Rebalance Bot",
+				},
+			},
+		},
+	}
+
+	sendToDiscord(payload)
+}

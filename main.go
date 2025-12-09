@@ -63,8 +63,11 @@ func main() {
 		case "prod":
 			IsDryRun = false
 		}
+
+		currentMode := IsDryRun
 		ConfigMutex.Unlock()
 
+		go SendDiscordModeChange(currentMode)
 		c.Redirect(http.StatusFound, "/api/status")
 	})
 
