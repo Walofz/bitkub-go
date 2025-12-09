@@ -16,7 +16,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -ldflags="-s -w" -o /bot-runner main.go database.go core_logic.go api_client.go config.go
+RUN go build -ldflags="-s -w" -o /app/bitkub-rebalance-bot main.go database.go core_logic.go api_client.go config.go
 
 # ----------------------------------------------------------------------
 # Stage 2: Final Image - ใช้ Alpine เพื่อให้ Image เล็กที่สุด
@@ -27,7 +27,7 @@ RUN apk --no-cache add sqlite-libs
 
 WORKDIR /app
 
-COPY --from=builder /bot-runner /app/bitkub-rebalance-bot
+COPY --from=builder /app/bitkub-rebalance-bot /app/bitkub-rebalance-bot
 
 COPY web /app/web
 
