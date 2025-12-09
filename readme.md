@@ -25,6 +25,9 @@
 BITKUB_API_KEY="YOUR_BITKUB_API_KEY"
 BITKUB_API_SECRET="YOUR_BITKUB_API_SECRET"
 
+# --- Discord ---
+DISCORD_WEBHOOK_URL=""
+
 # --- Bot Settings ---
 BOT_IS_DRY_RUN="true"             # true = จำลอง, false = เทรดจริง
 BOT_INITIAL_INVESTMENT="1000.0"   # เงินทุนเริ่มต้น (สำหรับคำนวณ ROI)
