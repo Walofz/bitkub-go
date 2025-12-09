@@ -172,16 +172,6 @@ func RunRebalance() {
 			}
 			tradeSym := assetData.Asset + "_THB"
 
-			// if amountToTrade < 10.0 {
-			// 	fmt.Printf("⏸️ SKIP: %s มูลค่าเทรด %.2f THB น้อยกว่าขั้นต่ำ 10.00 THB\n", assetData.Asset, amountToTrade)
-			// 	continue
-			// }
-
-			// if coinAmount <= 0.00000001 {
-			// 	fmt.Printf("⏸️ SKIP: %s ปริมาณเหรียญ %.8f น้อยเกินไปหลังการปัดเศษ\n", assetData.Asset, coinAmount)
-			// 	continue
-			// }
-
 			if dryRun {
 				mode := "DRY_RUN"
 				logMessage := fmt.Sprintf(
@@ -189,6 +179,7 @@ func RunRebalance() {
 					operation, coinAmount, assetData.Asset, amountToTrade, tradeSym)
 				fmt.Println("🔥 " + mode + ": " + logMessage)
 
+				SendDiscordTrade(assetData.Asset, operation, amountToTrade, coinAmount, assetData.CurrentPrice, "DRY_RUN")
 				LogTrade(assetData.Asset, operation, amountToTrade, coinAmount, assetData.CurrentPrice, mode, deviation, logMessage)
 			} else {
 				mode := "PRODUCTION"
@@ -200,6 +191,7 @@ func RunRebalance() {
 					fmt.Printf("❌ ERROR: %s\n", logMessage)
 				} else {
 					logMessage = "คำสั่งสำเร็จ: Order sent to Bitkub"
+					SendDiscordTrade(assetData.Asset, operation, amountToTrade, coinAmount, assetData.CurrentPrice, "PRODUCTION")
 				}
 
 				LogTrade(assetData.Asset, operation, amountToTrade, coinAmount, assetData.CurrentPrice, mode, deviation, logMessage)

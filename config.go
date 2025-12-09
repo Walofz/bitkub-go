@@ -16,6 +16,7 @@ var (
 	InitialInvestment float64
 	Threshold         float64
 	MinEthAmount      float64
+	DiscordWebhookURL string
 
 	TargetAssets = map[string]float64{
 		"THB": 50.0,
@@ -32,6 +33,7 @@ func init() {
 
 	APIKey = os.Getenv("BITKUB_API_KEY")
 	APISecret = os.Getenv("BITKUB_API_SECRET")
+	DiscordWebhookURL = os.Getenv("DISCORD_WEBHOOK_URL")
 
 	if APIKey == "" || APISecret == "" {
 		fmt.Println("❌ CRITICAL: BITKUB_API_KEY or SECRET is missing. Trading will fail.")

@@ -15,7 +15,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -ldflags="-s -w" -o /app/main main.go database.go core_logic.go api_client.go config.go
+RUN go build -ldflags="-s -w" -o /app/main .
 
 # ----------------------------------------------------------------------
 # Stage 2: Final Image (ใช้ Debian Bookworm Slim)

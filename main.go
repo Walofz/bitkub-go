@@ -12,8 +12,7 @@ func main() {
 		fmt.Printf("Fatal error during DB initialization: %v\n", err)
 		return
 	}
-	defer DB.Close()
-	go StartBotLoop()
+	defer DB.Close()	
 	r := gin.Default()
 
 	r.Static("/static", "./web")
@@ -69,5 +68,9 @@ func main() {
 		c.Redirect(http.StatusFound, "/api/status")
 	})
 
+	go func() {
+		SendDiscordStartup()
+		StartBotLoop()
+	}()
 	r.Run(":8888")
 }
