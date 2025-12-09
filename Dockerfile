@@ -27,7 +27,7 @@ RUN apk --no-cache add sqlite-libs
 
 WORKDIR /app
 
-COPY --from=builder /usr/local/bin/bitkub-rebalance-bot /usr/local/bin/bitkub-rebalance-bot
+COPY --from=builder /usr/local/bin/bitkub-rebalance-bot /app/bitkub-rebalance-bot
 
 COPY web /app/web
 
