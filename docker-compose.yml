@@ -1,0 +1,10 @@
+services:
+  bitkub-bot:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./data/db:/app/
+    restart: always

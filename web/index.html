@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitkub Rebalance Bot Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            border-left: 5px solid #007bff;
+            padding-left: 10px;
+            margin-top: 30px;
+            color: #444;
+        }
+
+        .status-box {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status-box.production {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-box.dry-run {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: right;
+        }
+
+        .table th:first-child,
+        .table td:first-child {
+            text-align: left;
+        }
+
+        .table th {
+            background-color: #007bff;
+            color: white;
+            font-weight: normal;
+        }
+
+        .control-panel button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .control-panel button.dry {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .control-panel button.prod {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .info-detail {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .info-detail p {
+            margin: 5px 0;
+        }
+
+        .roi-positive {
+            color: green;
+        }
+
+        .roi-negative {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🤖 Bitkub Rebalance Bot Status</h1>
+
+        <div class="status-box" id="mode-status-box">
+            โหมดปัจจุบัน: <span id="mode-display">...</span>
+        </div>
+
+        <div class="info-detail">
+            <p>อัปเดตล่าสุด: <span id="last-run-display">--:--:--</span></p>
+            <p style="font-weight: bold;">ETH ราคาล่าสุด: <span id="eth-price-display">...</span> THB</p>
+
+            <hr style="border-top: 1px solid #ccc; margin: 10px 0;">
+
+            <p style="font-size: 1.1em;">มูลค่าพอร์ตรวม: <span id="total-value-display"
+                    style="font-weight: bold;">...</span></p>
+            <p style="font-size: 1.1em;">ผลตอบแทน (ROI): <span id="roi-display" style="font-weight: bold;">0.00%</span>
+            </p>
+        </div>
+
+        <h3>📈 พอร์ตโฟลิโอและสัดส่วน</h3>
+
+        <table class="table" id="balance-table">
+            <thead>
+                <tr>
+                    <th>Asset</th>
+                    <th>จำนวนเหรียญที่มีอยู่</th>
+                    <th>ยอดคงเหลือ (THB Eq.)</th>
+                    <th>สัดส่วนจริง</th>
+                    <th>สัดส่วนเป้าหมาย</th>
+                </tr>
+            </thead>
+            <tbody id="balance-data">
+                <tr>
+                    <td colspan="5" style="text-align: center;">กำลังโหลดข้อมูล...</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>⚙️ การควบคุมบอท</h3>
+        <div class="control-panel" style="text-align: center;">
+            <button class="dry" onclick="toggleMode('dry')">เปลี่ยนเป็น DRY RUN</button>
+            <button class="prod" onclick="toggleMode('prod')">เปลี่ยนเป็น PRODUCTION</button>
+        </div>
+    </div>
+
+    <script>
+        const modeDisplay = document.getElementById('mode-display');
+        const modeStatusBox = document.getElementById('mode-status-box');
+        const lastRunDisplay = document.getElementById('last-run-display');
+        const ethPriceDisplay = document.getElementById('eth-price-display');
+        const totalValueDisplay = document.getElementById('total-value-display');
+        const roiDisplay = document.getElementById('roi-display');
+        const balanceTableBody = document.getElementById('balance-data');
+
+        const numberFormatter = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+
+        const coinFormatter = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2, // อย่างน้อย 2 ตำแหน่งเพื่อความสม่ำเสมอ
+            maximumFractionDigits: 8,
+        });
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                modeDisplay.textContent = data.mode;
+                modeStatusBox.className = 'status-box ' + (data.mode === 'DRY_RUN' ? 'dry-run' : 'production');
+                lastRunDisplay.textContent = data.last_run;
+
+                ethPriceDisplay.textContent = numberFormatter.format(data.eth_price || 0);
+                totalValueDisplay.textContent = numberFormatter.format(data.total_value || 0) + ' THB';
+
+                const roiValue = data.roi || 0;
+                roiDisplay.textContent = roiValue.toFixed(2) + '%';
+                roiDisplay.className = roiValue >= 0 ? 'roi-positive' : 'roi-negative';
+
+                balanceTableBody.innerHTML = '';
+
+                if (Array.isArray(data.portfolio)) {
+                    data.portfolio.forEach(asset => {
+                        const row = balanceTableBody.insertRow();
+
+                        const displayCoinBalance = asset.coin_balance || 0;
+                        const displayBalanceTHB = asset.balance_thb || 0;
+                        const displayActualPct = asset.actual_pct || 0;
+                        const displayTargetPct = asset.target_pct || 0;
+
+                        const deviation = Math.abs(displayActualPct - displayTargetPct);
+                        let rowClass = deviation > 5 ? 'style="background-color: #fff3cd;"' : '';
+                        row.setAttribute('style', rowClass);
+
+                        row.insertCell().textContent = asset.asset;
+
+                        let coinBalanceText = '';
+                        if (asset.asset === 'THB') {
+                            coinBalanceText = numberFormatter.format(displayCoinBalance);
+                        } else {
+                            coinBalanceText = coinFormatter.format(displayCoinBalance);
+                        }
+                        row.insertCell().textContent = coinBalanceText;
+
+                        row.insertCell().textContent = numberFormatter.format(displayBalanceTHB);
+                        row.insertCell().textContent = displayActualPct.toFixed(2) + '%';
+                        row.insertCell().textContent = displayTargetPct.toFixed(2) + '%';
+                    });
+                } else {
+                    const row = balanceTableBody.insertRow();
+                    row.insertCell(0).textContent = "ไม่พบข้อมูลพอร์ตโฟลิโอ หรือรูปแบบข้อมูลไม่ถูกต้อง";
+                    row.cells[0].colSpan = 5;
+                }
+
+            } catch (error) {
+                console.error('Error fetching status:', error);
+                const row = balanceTableBody.insertRow();
+                row.insertCell(0).textContent = "❌ ไม่สามารถเชื่อมต่อกับ Go Backend ได้";
+                row.cells[0].colSpan = 5;
+                balanceTableBody.innerHTML = row.outerHTML;
+            }
+        }
+
+        async function toggleMode(newMode) {
+            if (confirm(`คุณแน่ใจหรือไม่ที่จะเปลี่ยนโหมดเป็น ${newMode.toUpperCase()}?`)) {
+                try {
+                    await fetch(`/api/mode/${newMode}`, { method: 'POST' });
+                    fetchStatus();
+                } catch (error) {
+                    console.error('Error toggling mode:', error);
+                    alert('เกิดข้อผิดพลาดในการเปลี่ยนโหมด');
+                }
+            }
+        }
+
+        setInterval(fetchStatus, 5000);
+        fetchStatus();
+    </script>
+</body>
+
+</html>
