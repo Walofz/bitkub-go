@@ -24,6 +24,7 @@ test/
 /vendor/
 /pkg/
 /bin/
+bitkub-rebalance-bot
 
 # IDE files
 .vscode/
