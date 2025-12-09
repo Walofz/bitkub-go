@@ -31,4 +31,4 @@ COPY --from=builder /usr/local/bin/bitkub-rebalance-bot /app/bitkub-rebalance-bo
 
 COPY web /app/web
 
-CMD ["/usr/local/bin/bitkub-rebalance-bot"]
+CMD ["/app/bitkub-rebalance-bot"]
