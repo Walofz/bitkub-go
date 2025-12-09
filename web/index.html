@@ -161,6 +161,30 @@
             </tbody>
         </table>
 
+        <h3 style="margin-top: 40px; border-left: 5px solid #28a745; color: #28a745;">
+            📜 ประวัติการเทรดจริง (Production Log)
+        </h3>
+        <p style="font-size: 0.9em; color: #666;">แสดง 50 รายการล่าสุด</p>
+
+        <table class="table" id="history-table">
+            <thead>
+                <tr style="background-color: #28a745;">
+                    <th>เวลา</th>
+                    <th>คู่เหรียญ</th>
+                    <th>Action</th>
+                    <th>ราคา (THB)</th>
+                    <th>จำนวนเงิน (THB)</th>
+                    <th>จำนวนเหรียญ</th>
+                    <th>% เบี่ยงเบน</th>
+                </tr>
+            </thead>
+            <tbody id="history-data">
+                <tr>
+                    <td colspan="7" style="text-align: center;">กำลังโหลดข้อมูล...</td>
+                </tr>
+            </tbody>
+        </table>
+
         <h3>⚙️ การควบคุมบอท</h3>
         <div class="control-panel" style="text-align: center;">
             <button class="dry" onclick="toggleMode('dry')">เปลี่ยนเป็น DRY RUN</button>
@@ -247,6 +271,45 @@
             }
         }
 
+        async function fetchHistory() {
+            try {
+                const response = await fetch('/api/history');
+                const data = await response.json();
+                const tbody = document.getElementById('history-data');
+
+                tbody.innerHTML = '';
+
+                if (!data.trades || data.trades.length === 0) {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `<td colspan="7" style="text-align: center;">ยังไม่มีประวัติการเทรดในโหมด Production</td>`;
+                    return;
+                }
+
+                data.trades.forEach(trade => {
+                    const row = tbody.insertRow();
+                    row.insertCell().textContent = trade.timestamp;
+                    row.insertCell().textContent = trade.asset;
+
+                    const opCell = row.insertCell();
+                    opCell.textContent = trade.operation.toUpperCase();
+                    opCell.style.fontWeight = 'bold';
+                    if (trade.operation === 'buy') {
+                        opCell.style.color = 'green';
+                    } else {
+                        opCell.style.color = 'red';
+                    }
+
+                    row.insertCell().textContent = numberFormatter.format(trade.price);
+                    row.insertCell().textContent = numberFormatter.format(trade.amount_thb);
+                    row.insertCell().textContent = coinFormatter.format(trade.coin_amount);
+                    row.insertCell().textContent = trade.deviation.toFixed(2) + '%';
+                });
+
+            } catch (error) {
+                console.error('Error fetching history:', error);
+            }
+        }
+
         async function toggleMode(newMode) {
             if (confirm(`คุณแน่ใจหรือไม่ที่จะเปลี่ยนโหมดเป็น ${newMode.toUpperCase()}?`)) {
                 try {
@@ -259,8 +322,10 @@
             }
         }
 
-        setInterval(fetchStatus, 5000);
+        setInterval(fetchStatus, 10000);
+        setInterval(fetchHistory, 10000);
         fetchStatus();
+        fetchHistory();
     </script>
 </body>
 

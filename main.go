@@ -43,6 +43,18 @@ func main() {
 		})
 	})
 
+	r.GET("/api/history", func(c *gin.Context) {
+		trades, err := GetProductionTrades(50)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"trades": trades,
+		})
+	})
+
 	r.POST("/api/mode/:mode", func(c *gin.Context) {
 		newMode := c.Param("mode")
 		ConfigMutex.Lock()

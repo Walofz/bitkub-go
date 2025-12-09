@@ -7,14 +7,24 @@ import (
 	"path/filepath"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3" // ไดรเวอร์ SQLite
+	_ "github.com/mattn/go-sqlite3"
 )
 
-// ตัวแปร Global สำหรับการเชื่อมต่อฐานข้อมูล
 var DB *sql.DB
 
+type TradeRecord struct {
+	ID         int     `json:"id"`
+	Timestamp  string  `json:"timestamp"`
+	Asset      string  `json:"asset"`
+	Operation  string  `json:"operation"`
+	AmountTHB  float64 `json:"amount_thb"`
+	CoinAmount float64 `json:"coin_amount"`
+	Price      float64 `json:"price"`
+	Deviation  float64 `json:"deviation"`
+}
+
 func InitDB() error {
-	dbPath := "./db/bot_trades.db"
+	dbPath := "db/bot_trades.db"
 
 	dir := filepath.Dir(dbPath)
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -84,4 +94,41 @@ func LogTrade(
 	if err != nil {
 		fmt.Printf("❌ Error saving trade to DB: %v\n", err)
 	}
+}
+
+func GetProductionTrades(limit int) ([]TradeRecord, error) {
+	if DB == nil {
+		return nil, fmt.Errorf("database not initialized")
+	}
+
+	query := `
+		SELECT id, timestamp, asset, operation, amount_thb, coin_amount, price, deviation
+		FROM trades
+		WHERE mode = 'PRODUCTION'
+		ORDER BY id DESC
+		LIMIT ?
+	`
+
+	rows, err := DB.Query(query, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var trades []TradeRecord
+	for rows.Next() {
+		var r TradeRecord
+		var ts time.Time
+
+		// Scan ข้อมูลเข้าตัวแปร
+		err := rows.Scan(&r.ID, &ts, &r.Asset, &r.Operation, &r.AmountTHB, &r.CoinAmount, &r.Price, &r.Deviation)
+		if err != nil {
+			continue
+		}
+
+		r.Timestamp = ts.Format("02/01/2006 15:04:05")
+		trades = append(trades, r)
+	}
+
+	return trades, nil
 }
