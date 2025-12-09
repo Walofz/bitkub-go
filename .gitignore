@@ -24,8 +24,11 @@ test/
 /vendor/
 /pkg/
 /bin/
+
+# Database files & folders
 bitkub-rebalance-bot
-bot_trades.db
+db/
+data/
 
 # IDE files
 .vscode/

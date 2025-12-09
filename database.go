@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	_ "github.com/mattn/go-sqlite3" // ไดรเวอร์ SQLite
@@ -11,17 +13,20 @@ import (
 // ตัวแปร Global สำหรับการเชื่อมต่อฐานข้อมูล
 var DB *sql.DB
 
-// InitDB: เชื่อมต่อและเตรียมฐานข้อมูล
 func InitDB() error {
-	var err error
+	dbPath := "./db/bot_trades.db"
 
-	// 1. เชื่อมต่อฐานข้อมูล (ไฟล์ bot_trades.db จะถูกสร้างขึ้นถ้าไม่มี)
-	DB, err = sql.Open("sqlite3", "./bot_trades.db")
+	dir := filepath.Dir(dbPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("error creating database directory: %w", err)
+	}
+
+	var err error
+	DB, err = sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return fmt.Errorf("error opening database: %w", err)
 	}
 
-	// 2. สร้างตารางถ้ายังไม่มี
 	createTableSQL := `
 	CREATE TABLE IF NOT EXISTS trades (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +36,7 @@ func InitDB() error {
 		amount_thb REAL,
 		coin_amount REAL,
 		price REAL,
-		mode TEXT,         -- 'PRODUCTION' หรือ 'DRY_RUN'
+		mode TEXT,
 		deviation REAL,
 		log_message TEXT
 	);
@@ -42,7 +47,7 @@ func InitDB() error {
 		return fmt.Errorf("error creating trades table: %w", err)
 	}
 
-	fmt.Println("✅ Database (SQLite) initialized successfully.")
+	fmt.Println("✅ Database initialized at:", dbPath)
 	return nil
 }
 
