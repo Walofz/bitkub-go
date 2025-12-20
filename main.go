@@ -13,8 +13,10 @@ func main() {
 		return
 	}
 	defer DB.Close()
+	// r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
 	gin.SetMode(gin.ReleaseMode)	
-	r := gin.Default()
 
 	r.Static("/static", "./web")
 	r.LoadHTMLFiles("web/index.html")
