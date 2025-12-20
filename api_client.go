@@ -58,7 +58,7 @@ func sendPrivateRequest(endpoint string, method string, payload map[string]inter
 	var errorCheck map[string]interface{}
 	if err := json.Unmarshal(body, &errorCheck); err == nil {
 		if code, ok := errorCheck["error"].(float64); ok && code != 0 {
-			return nil, fmt.Errorf("Bitkub API Error Code %d: %s", int(code), string(body))
+			return nil, fmt.Errorf("bitkub API error code %d: %s", int(code), string(body))
 		}
 	}
 
