@@ -1,274 +1,194 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="bg-slate-950 text-slate-200">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitkub Rebalance Bot Status</title>
+    <title>Bitkub Rebalance Pro - Fixed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        * {
+            cursor: none !important;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f4f4f4;
-            color: #333;
+            font-family: 'Chakra Petch', sans-serif;
+            overflow: hidden;
+            height: 480px;
+            width: 800px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            box-sizing: border-box;
+            gap: 12px;
+            background: #020617;
+            /* ????????????????????????????????? */
         }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
         }
 
-        h1 {
-            color: #007bff;
-            text-align: center;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
+        .card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        h3 {
-            border-left: 5px solid #007bff;
-            padding-left: 10px;
-            margin-top: 30px;
-            color: #444;
+        .status-production {
+            background-color: #059669;
+            color: white;
         }
 
-        .status-box {
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
+        .status-dry-run {
+            background-color: #d97706;
+            color: white;
         }
 
-        .status-box.production {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-box.dry-run {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-
-        .table {
+        table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
         }
 
-        .table th,
-        .table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: right;
-        }
-
-        .table th:first-child,
-        .table td:first-child {
+        th {
             text-align: left;
+            color: #64748b;
+            font-size: 10px;
+            text-transform: uppercase;
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .table th {
-            background-color: #007bff;
-            color: white;
-            font-weight: normal;
+        td {
+            padding: 6px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
         }
 
-        .control-panel button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .control-panel button.dry {
-            background-color: #ffc107;
-            color: #333;
-        }
-
-        .control-panel button.prod {
-            background-color: #28a745;
-            color: white;
-        }
-
-        .info-detail {
-            background: #e9ecef;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: left;
-            margin-bottom: 15px;
-        }
-
-        .info-detail p {
-            margin: 5px 0;
-        }
-
-        .roi-positive {
-            color: green;
-        }
-
-        .roi-negative {
-            color: red;
+        ::-webkit-scrollbar {
+            width: 0px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>🤖 Bitkub Rebalance Bot Status</h1>
 
-        <div class="status-box" id="mode-status-box">
-            โหมดปัจจุบัน: <span id="mode-display">...</span>
+    <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded-2xl border border-white/10 shadow-lg">
+        <div class="flex items-center gap-4">
+            <div id="mode-status-box" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                MODE: <span id="mode-display">...</span>
+            </div>
+            <h1 class="font-bold text-lg tracking-tighter uppercase italic">Bitkub <span
+                    class="text-blue-500">Rebalance</span></h1>
         </div>
+        <div id="last-run-display" class="mono text-sm text-blue-400 font-bold tracking-widest">--:--:--</div>
+    </div>
 
-        <div class="info-detail">
-            <p>อัปเดตล่าสุด: <span id="last-run-display">--:--:--</span></p>
-            <p style="font-weight: bold;">ETH ราคาล่าสุด: <span id="eth-price-display">...</span> THB</p>
-
-            <hr style="border-top: 1px solid #ccc; margin: 10px 0;">
-
-            <p style="font-size: 1.1em;">มูลค่าพอร์ตรวม: <span id="total-value-display"
-                    style="font-weight: bold;">...</span></p>
-            <p style="font-size: 1.1em;">ผลตอบแทน (ROI): <span id="roi-display" style="font-weight: bold;">0.00%</span>
-            </p>
+    <div class="grid grid-cols-3 gap-4">
+        <div class="card rounded-3xl p-4 flex flex-col justify-between border-l-4 border-l-emerald-500 bg-slate-900/50">
+            <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest">Net Asset Value</span>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-emerald-500 text-2xl font-light italic">&#3647;</span>
+                <div id="total-value-display" class="text-4xl font-bold mono text-white tracking-tighter">0.00</div>
+            </div>
         </div>
-
-        <h3>📈 พอร์ตโฟลิโอและสัดส่วน</h3>
-
-        <table class="table" id="balance-table">
-            <thead>
-                <tr>
-                    <th>Asset</th>
-                    <th>จำนวนเหรียญที่มีอยู่</th>
-                    <th>ยอดคงเหลือ (THB Eq.)</th>
-                    <th>สัดส่วนจริง</th>
-                    <th>สัดส่วนเป้าหมาย</th>
-                </tr>
-            </thead>
-            <tbody id="balance-data">
-                <tr>
-                    <td colspan="5" style="text-align: center;">กำลังโหลดข้อมูล...</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h3 style="margin-top: 40px; border-left: 5px solid #28a745; color: #28a745;">
-            📜 ประวัติการเทรดจริง (Production Log)
-        </h3>
-        <p style="font-size: 0.9em; color: #666;">แสดง 50 รายการล่าสุด</p>
-
-        <table class="table" id="history-table">
-            <thead>
-                <tr style="background-color: #28a745;">
-                    <th>เวลา</th>
-                    <th>คู่เหรียญ</th>
-                    <th>Action</th>
-                    <th>ราคา (THB)</th>
-                    <th>จำนวนเงิน (THB)</th>
-                    <th>จำนวนเหรียญ</th>
-                    <th>% เบี่ยงเบน</th>
-                </tr>
-            </thead>
-            <tbody id="history-data">
-                <tr>
-                    <td colspan="7" style="text-align: center;">กำลังโหลดข้อมูล...</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <h3>⚙️ การควบคุมบอท</h3>
-        <div class="control-panel" style="text-align: center;">
-            <button class="dry" onclick="toggleMode('dry')">เปลี่ยนเป็น DRY RUN</button>
-            <button class="prod" onclick="toggleMode('prod')">เปลี่ยนเป็น PRODUCTION</button>
+        <div class="card rounded-3xl p-4 flex flex-col justify-between border-l-4 border-l-blue-500">
+            <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest font-bold">ETH/THB Price</span>
+            <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-blue-500 text-sm font-bold">&#3647;</span>
+                <div id="eth-price-display" class="text-3xl font-bold mono text-white">...</div>
+            </div>
+        </div>
+        <div class="card rounded-3xl p-4 flex flex-col justify-between">
+            <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest">ROI Performance</span>
+            <div id="roi-display" class="text-4xl font-bold mono leading-tight mt-1 tracking-tighter text-slate-400">
+                0.00%</div>
         </div>
     </div>
 
+    <div class="grid grid-cols-5 gap-4 flex-1 min-h-0">
+        <div class="col-span-3 card rounded-3xl flex flex-col overflow-hidden">
+            <div
+                class="bg-white/5 p-3 px-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5">
+                Asset Allocation</div>
+            <div class="flex-1 overflow-y-auto">
+                <table class="text-xs">
+                    <thead class="sticky top-0 bg-slate-900">
+                        <tr>
+                            <th>Asset</th>
+                            <th class="text-right">Balance</th>
+                            <th class="text-right">Actual</th>
+                            <th class="text-right">Target</th>
+                        </tr>
+                    </thead>
+                    <tbody id="balance-data" class="mono text-slate-300"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div
+            class="col-span-2 card rounded-3xl flex flex-col overflow-hidden border-l-4 border-l-emerald-600 shadow-xl">
+            <div
+                class="bg-white/5 p-3 px-5 text-[10px] font-black text-slate-400 uppercase border-b border-white/5 flex justify-between">
+                <span>Production Logs</span>
+                <span class="text-emerald-500 px-2 bg-emerald-500/10 rounded-full">10</span>
+            </div>
+            <div class="flex-1 overflow-y-auto bg-slate-950/20 text-[11px]">
+                <table class="w-full">
+                    <tbody id="history-data" class="mono divide-y divide-white/5"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-between items-center bg-slate-900/50 p-2 px-4 rounded-2xl border border-white/5">
+        <div class="flex gap-3">
+            <button onclick="toggleMode('dry')"
+                class="px-6 py-2 bg-amber-600/10 text-amber-500 rounded-xl text-xs font-black border border-amber-600/30">DRY
+                RUN</button>
+            <button onclick="toggleMode('prod')"
+                class="px-6 py-2 bg-emerald-600/20 text-emerald-400 rounded-xl text-xs font-black border border-emerald-600/30">PRODUCTION</button>
+        </div>
+        <div class="text-[9px] text-slate-600 font-bold mono uppercase">DietPi-Pro-Bot</div>
+    </div>
+
     <script>
-        const modeDisplay = document.getElementById('mode-display');
-        const modeStatusBox = document.getElementById('mode-status-box');
-        const lastRunDisplay = document.getElementById('last-run-display');
-        const ethPriceDisplay = document.getElementById('eth-price-display');
-        const totalValueDisplay = document.getElementById('total-value-display');
-        const roiDisplay = document.getElementById('roi-display');
-        const balanceTableBody = document.getElementById('balance-data');
-
-        const numberFormatter = new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        });
-
-        const coinFormatter = new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2, // อย่างน้อย 2 ตำแหน่งเพื่อความสม่ำเสมอ
-            maximumFractionDigits: 8,
-        });
+        const numberFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const coinFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
 
         async function fetchStatus() {
             try {
                 const response = await fetch('/api/status');
                 const data = await response.json();
 
-                modeDisplay.textContent = data.mode;
-                modeStatusBox.className = 'status-box ' + (data.mode === 'DRY_RUN' ? 'dry-run' : 'production');
-                lastRunDisplay.textContent = data.last_run;
+                if (!data) return;
 
-                ethPriceDisplay.textContent = numberFormatter.format(data.eth_price || 0);
-                totalValueDisplay.textContent = numberFormatter.format(data.total_value || 0) + ' THB';
+                document.getElementById('mode-display').textContent = data.mode || 'N/A';
+                document.getElementById('mode-status-box').className = 'px-3 py-1 rounded-full text-[10px] font-black uppercase transition-all ' + (data.mode === 'DRY_RUN' ? 'status-dry-run' : 'status-production');
+                document.getElementById('last-run-display').textContent = data.last_run || '--:--:--';
+                document.getElementById('eth-price-display').textContent = numberFormatter.format(data.eth_price || 0);
+                document.getElementById('total-value-display').textContent = numberFormatter.format(data.total_value || 0);
 
                 const roiValue = data.roi || 0;
-                roiDisplay.textContent = roiValue.toFixed(2) + '%';
-                roiDisplay.className = roiValue >= 0 ? 'roi-positive' : 'roi-negative';
+                const roiDisplay = document.getElementById('roi-display');
+                roiDisplay.textContent = (roiValue >= 0 ? '+' : '') + roiValue.toFixed(2) + '%';
+                roiDisplay.className = 'text-4xl font-bold mono leading-tight mt-1 tracking-tighter ' + (roiValue >= 0 ? 'text-green-400' : 'text-red-400');
 
-                balanceTableBody.innerHTML = '';
-
-                if (Array.isArray(data.portfolio)) {
+                const tbody = document.getElementById('balance-data');
+                tbody.innerHTML = '';
+                if (data.portfolio && Array.isArray(data.portfolio)) {
                     data.portfolio.forEach(asset => {
-                        const row = balanceTableBody.insertRow();
-
-                        const displayCoinBalance = asset.coin_balance || 0;
-                        const displayBalanceTHB = asset.balance_thb || 0;
-                        const displayActualPct = asset.actual_pct || 0;
-                        const displayTargetPct = asset.target_pct || 0;
-
-                        const deviation = Math.abs(displayActualPct - displayTargetPct);
-                        let rowClass = deviation > 5 ? 'style="background-color: #fff3cd;"' : '';
-                        row.setAttribute('style', rowClass);
-
-                        row.insertCell().textContent = asset.asset;
-
-                        let coinBalanceText = '';
-                        if (asset.asset === 'THB') {
-                            coinBalanceText = numberFormatter.format(displayCoinBalance);
-                        } else {
-                            coinBalanceText = coinFormatter.format(displayCoinBalance);
-                        }
-                        row.insertCell().textContent = coinBalanceText;
-
-                        row.insertCell().textContent = numberFormatter.format(displayBalanceTHB);
-                        row.insertCell().textContent = displayActualPct.toFixed(2) + '%';
-                        row.insertCell().textContent = displayTargetPct.toFixed(2) + '%';
+                        const dev = Math.abs((asset.actual_pct || 0) - (asset.target_pct || 0));
+                        tbody.innerHTML += `<tr class="${dev > 5 ? 'bg-amber-500/10' : ''}">
+                            <td class="font-black text-slate-100 uppercase">${asset.asset}</td>
+                            <td class="text-right">${asset.asset === 'THB' ? numberFormatter.format(asset.coin_balance || 0) : coinFormatter.format(asset.coin_balance || 0)}</td>
+                            <td class="text-right text-blue-400 font-bold">${(asset.actual_pct || 0).toFixed(2)}%</td>
+                            <td class="text-right text-slate-600 font-bold">${(asset.target_pct || 0).toFixed(2)}%</td>
+                        </tr>`;
                     });
-                } else {
-                    const row = balanceTableBody.insertRow();
-                    row.insertCell(0).textContent = "ไม่พบข้อมูลพอร์ตโฟลิโอ หรือรูปแบบข้อมูลไม่ถูกต้อง";
-                    row.cells[0].colSpan = 5;
                 }
-
-            } catch (error) {
-                console.error('Error fetching status:', error);
-                const row = balanceTableBody.insertRow();
-                row.insertCell(0).textContent = "❌ ไม่สามารถเชื่อมต่อกับ Go Backend ได้";
-                row.cells[0].colSpan = 5;
-                balanceTableBody.innerHTML = row.outerHTML;
-            }
+            } catch (error) { console.error('FetchStatus Error:', error); }
         }
 
         async function fetchHistory() {
@@ -276,54 +196,31 @@
                 const response = await fetch('/api/history');
                 const data = await response.json();
                 const tbody = document.getElementById('history-data');
-
                 tbody.innerHTML = '';
 
-                if (!data.trades || data.trades.length === 0) {
-                    const row = tbody.insertRow();
-                    row.innerHTML = `<td colspan="7" style="text-align: center;">ยังไม่มีประวัติการเทรดในโหมด Production</td>`;
-                    return;
+                if (data && data.trades && Array.isArray(data.trades)) {
+                    data.trades.slice(0, 10).forEach(trade => {
+                        // ?????????????? Split ??? (Check null/undefined)
+                        const rawTs = trade.timestamp || "0000-00-00 00:00:00";
+                        const parts = rawTs.includes(' ') ? rawTs.split(' ') : [rawTs, ""];
+
+                        tbody.innerHTML += `<tr>
+                            <td class="p-2 leading-tight">
+                                <div class="text-[8px] text-slate-600 italic mb-0.5">${parts[0]}</div>
+                                <div class="text-[10px] text-slate-400 font-bold">${parts[1]}</div>
+                            </td>
+                            <td class="p-2 font-black ${trade.operation === 'buy' ? 'text-green-500' : 'text-red-500'} uppercase">${trade.operation || 'N/A'}</td>
+                            <td class="p-2 text-right font-bold text-slate-300">${numberFormatter.format(trade.amount_thb || 0)} <span class="text-[9px] text-slate-500">&#3647;</span></td>
+                        </tr>`;
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-5 text-slate-600 italic uppercase tracking-widest text-[10px]">No Logs Available</td></tr>';
                 }
-
-                data.trades.forEach(trade => {
-                    const row = tbody.insertRow();
-                    row.insertCell().textContent = trade.timestamp;
-                    row.insertCell().textContent = trade.asset;
-
-                    const opCell = row.insertCell();
-                    opCell.textContent = trade.operation.toUpperCase();
-                    opCell.style.fontWeight = 'bold';
-                    if (trade.operation === 'buy') {
-                        opCell.style.color = 'green';
-                    } else {
-                        opCell.style.color = 'red';
-                    }
-
-                    row.insertCell().textContent = numberFormatter.format(trade.price);
-                    row.insertCell().textContent = numberFormatter.format(trade.amount_thb);
-                    row.insertCell().textContent = coinFormatter.format(trade.coin_amount);
-                    row.insertCell().textContent = trade.deviation.toFixed(2) + '%';
-                });
-
-            } catch (error) {
-                console.error('Error fetching history:', error);
-            }
+            } catch (error) { console.error('FetchHistory Error:', error); }
         }
 
-        async function toggleMode(newMode) {
-            if (confirm(`คุณแน่ใจหรือไม่ที่จะเปลี่ยนโหมดเป็น ${newMode.toUpperCase()}?`)) {
-                try {
-                    await fetch(`/api/mode/${newMode}`, { method: 'POST' });
-                    fetchStatus();
-                } catch (error) {
-                    console.error('Error toggling mode:', error);
-                    alert('เกิดข้อผิดพลาดในการเปลี่ยนโหมด');
-                }
-            }
-        }
-
-        setInterval(fetchStatus, 10000);
-        setInterval(fetchHistory, 10000);
+        setInterval(fetchStatus, 1000);
+        setInterval(fetchHistory, 30000);
         fetchStatus();
         fetchHistory();
     </script>

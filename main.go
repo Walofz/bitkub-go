@@ -12,7 +12,8 @@ func main() {
 		fmt.Printf("Fatal error during DB initialization: %v\n", err)
 		return
 	}
-	defer DB.Close()	
+	defer DB.Close()
+	gin.SetMode(gin.ReleaseMode)	
 	r := gin.Default()
 
 	r.Static("/static", "./web")

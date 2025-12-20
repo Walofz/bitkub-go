@@ -40,3 +40,4 @@ data/
 # Docker
 /data/db/        # โฟลเดอร์เก็บ SQLite DB (จาก docker-compose volumes)
 /bot-runner      # ไฟล์ Binary ที่ถูก Build
+bitkub-bot
