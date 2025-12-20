@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="th" class="bg-slate-950 text-slate-200">
-
 <head>
     <meta charset="UTF-8">
     <meta name="google" content="notranslate">
@@ -9,12 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Chakra Petch', sans-serif;
-            overflow: hidden;
-            height: 480px;
-            width: 800px;
+        
+        body { 
+            font-family: 'Chakra Petch', sans-serif; 
+            overflow: hidden; 
+            height: 480px; 
+            width: 800px; 
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -22,159 +21,95 @@
             box-sizing: border-box;
             gap: 12px;
             background: radial-gradient(circle at top right, #0f172a, #020617);
-            /* ซ่อนเมาส์ในพื้นที่ทั่วไป */
-            cursor: none !important;
+            /* ซ่อนเมาส์ในพื้นที่ทั่วไปเพื่อความคลีน */
+            cursor: none !important; 
         }
-
-        /* แสดงเมาส์เฉพาะเมื่ออยู่บนปุ่มกดเพื่อให้เปลี่ยนโหมดได้ */
-        button,
-        a,
-        label {
+        
+        /* แสดงเมาส์เฉพาะเมื่ออยู่บนปุ่มกดเพื่อให้กดเปลี่ยนโหมดได้สะดวก */
+        button, a, label, .clickable {
             cursor: pointer !important;
         }
 
-        .mono {
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .card {
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .card { 
+            background: rgba(30, 41, 59, 0.4); 
+            border: 1px solid rgba(255,255,255,0.05); 
             backdrop-filter: blur(8px);
         }
 
-        .status-production {
-            background-color: #059669;
-            color: white;
-            box-shadow: 0 0 15px rgba(5, 150, 105, 0.4);
-        }
+        .status-production { background-color: #059669; color: white; box-shadow: 0 0 15px rgba(5, 150, 105, 0.4); }
+        .status-dry-run { background-color: #d97706; color: white; box-shadow: 0 0 15px rgba(217, 119, 6, 0.4); }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #64748b; font-size: 10px; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        td { padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        .glow-text { text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
 
-        .status-dry-run {
-            background-color: #d97706;
-            color: white;
-            box-shadow: 0 0 15px rgba(217, 119, 6, 0.4);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            color: #64748b;
-            font-size: 10px;
-            text-transform: uppercase;
-            padding: 6px 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        td {
-            padding: 7px 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        ::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
-        }
-
-        .glow-text {
-            text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-        }
-
-        /* Touch Feedback สำหรับปุ่มกดบนจอ 7 นิ้ว */
+        /* Touch Feedback สำหรับจอสัมผัส 7 นิ้ว */
         button:active {
-            transform: scale(0.95);
-            filter: brightness(1.2);
+            transform: scale(0.92);
+            filter: brightness(1.3);
         }
     </style>
 </head>
-
 <body>
 
     <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded-2xl border border-white/10 shadow-2xl">
         <div class="flex items-center gap-4">
-            <div id="mode-status-box"
-                class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all duration-500">
+            <div id="mode-status-box" class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all">
                 MODE: <span id="mode-display">LOADING...</span>
             </div>
             <h1 class="font-bold text-lg tracking-tighter uppercase italic">
-                Bitkub <span class="text-blue-500">Rebalance</span>
-                <span class="text-slate-500 font-light italic">Engine</span>
+                Bitkub <span class="text-blue-500">Rebalance</span> 
             </h1>
         </div>
-        <div class="text-right">
-            <div id="last-run-display" class="mono text-sm text-blue-400 font-bold tracking-widest">--:--:--</div>
-        </div>
+        <div id="last-run-display" class="mono text-sm text-blue-400 font-bold tracking-widest">--:--:--</div>
     </div>
 
     <div class="grid grid-cols-3 gap-4">
-        <div
-            class="card rounded-3xl p-4 flex flex-col justify-between relative border-l-4 border-l-emerald-500 bg-gradient-to-br from-slate-800/80 to-slate-900/50 shadow-lg shadow-emerald-900/20">
-            <div class="flex justify-between items-start">
-                <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest">Net Asset Value</span>
-                <span
-                    class="text-[9px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">LIVE</span>
-            </div>
+        <div class="card rounded-3xl p-4 flex flex-col justify-between border-l-4 border-l-emerald-500 bg-slate-900/40">
+            <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest">Net Asset Value</span>
             <div class="flex items-baseline gap-2 mt-1">
                 <span class="text-emerald-500 text-2xl font-light italic">&#3647;</span>
-                <div id="total-value-display" class="text-4xl font-bold mono text-white tracking-tighter glow-text">0.00
-                </div>
+                <div id="total-value-display" class="text-4xl font-bold mono text-white tracking-tighter glow-text">0.00</div>
             </div>
-            <div class="mt-2 border-t border-white/5 pt-2 flex items-center gap-2">
-                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                <span class="text-[9px] text-slate-400 uppercase font-bold tracking-tight">Real-time Calculation</span>
-            </div>
+            <div class="mt-2 text-[9px] text-slate-500 font-bold uppercase tracking-widest">Real-time NAV</div>
         </div>
 
-        <div class="card rounded-3xl p-4 flex flex-col justify-between border-l-4 border-l-blue-500 shadow-lg">
+        <div class="card rounded-3xl p-4 flex flex-col justify-between border-l-4 border-l-blue-500">
             <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest">ETH/THB Price</span>
             <div class="flex items-baseline gap-2 mt-1">
                 <span class="text-blue-500 text-sm font-bold">&#3647;</span>
                 <div id="eth-price-display" class="text-3xl font-bold mono text-white tracking-tighter">...</div>
             </div>
-            <div class="mt-2 text-[9px] text-blue-400/60 font-bold uppercase tracking-tighter italic">Market data from
-                Bitkub</div>
         </div>
 
         <div class="card rounded-3xl p-4 flex flex-col justify-between shadow-lg">
-            <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest font-bold text-slate-400">ROI
-                Performance</span>
-            <div id="roi-display" class="text-4xl font-bold mono leading-tight mt-1 tracking-tighter text-slate-400">
-                0.00%</div>
-            <div class="mt-2 text-[10px] text-slate-500 font-medium uppercase italic border-t border-white/5 pt-1">
-                Cumulative Return</div>
+            <span class="text-slate-500 text-[10px] uppercase font-black tracking-widest font-bold">ROI Performance</span>
+            <div id="roi-display" class="text-4xl font-bold mono leading-tight mt-1 tracking-tighter text-slate-400">0.00%</div>
         </div>
     </div>
 
     <div class="grid grid-cols-5 gap-4 flex-1 min-h-0">
         <div class="col-span-3 card rounded-3xl flex flex-col overflow-hidden shadow-xl">
-            <div
-                class="bg-white/5 p-3 px-5 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] border-b border-white/5">
-                Asset Allocation</div>
+            <div class="bg-white/5 p-3 px-5 text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-white/5">Asset Allocation</div>
             <div class="flex-1 overflow-y-auto">
                 <table class="text-xs">
                     <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-sm z-20">
-                        <tr>
-                            <th>Asset</th>
-                            <th class="text-right">Balance</th>
-                            <th class="text-right">Actual</th>
-                            <th class="text-right">Target</th>
-                        </tr>
+                        <tr><th>Asset</th><th class="text-right">Balance</th><th class="text-right">Actual</th><th class="text-right">Target</th></tr>
                     </thead>
                     <tbody id="balance-data" class="mono text-slate-300"></tbody>
                 </table>
             </div>
         </div>
 
-        <div
-            class="col-span-2 card rounded-3xl flex flex-col overflow-hidden border-l-4 border-l-emerald-600 shadow-xl">
-            <div
-                class="bg-white/5 p-3 px-5 text-[10px] font-black text-slate-400 uppercase border-b border-white/5 flex justify-between items-center">
+        <div class="col-span-2 card rounded-3xl flex flex-col overflow-hidden border-l-4 border-l-emerald-600 shadow-xl">
+            <div class="bg-white/5 p-3 px-5 text-[10px] font-black text-slate-400 uppercase border-b border-white/5 flex justify-between items-center">
                 <span>Production Logs</span>
-                <span class="text-[9px] font-black text-emerald-500 px-2 bg-emerald-500/10 rounded-full italic">RECENT
-                    10</span>
+                <span class="text-[9px] font-black text-emerald-500 px-2 bg-emerald-500/10 rounded-full">10</span>
             </div>
             <div class="flex-1 overflow-y-auto bg-slate-950/20">
                 <table class="text-[11px]">
@@ -184,24 +119,33 @@
         </div>
     </div>
 
-    <div
-        class="flex justify-between items-center bg-slate-900/80 p-3 px-6 rounded-2xl border border-white/10 shadow-inner">
-        <div class="flex gap-4">
-            <button onclick="toggleMode('dry')"
-                class="px-8 py-3 bg-amber-600/20 hover:bg-amber-600/40 text-amber-500 rounded-2xl text-xs font-black border border-amber-600/40 transition-all">DRY
-                RUN</button>
-            <button onclick="toggleMode('prod')"
-                class="px-8 py-3 bg-emerald-600/20 hover:bg-emerald-600/40 text-emerald-400 rounded-2xl text-xs font-black border border-emerald-600/40 transition-all">PRODUCTION</button>
+    <div class="flex justify-between items-center bg-slate-900/80 p-3 px-5 rounded-2xl border border-white/10 shadow-inner">
+        <div class="flex gap-3">
+            <button onclick="toggleMode('dry')" class="px-7 py-3 bg-amber-600/20 hover:bg-amber-600/30 text-amber-500 rounded-2xl text-[11px] font-black border border-amber-600/30 transition-all uppercase">DRY RUN</button>
+            <button onclick="toggleMode('prod')" class="px-7 py-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-2xl text-[11px] font-black border border-emerald-600/30 transition-all uppercase">Production</button>
+            
+            <button onclick="hardReload()" class="px-5 py-3 bg-slate-700/30 hover:bg-slate-700/50 text-slate-400 rounded-2xl text-[10px] font-black border border-slate-700/30 transition-all uppercase tracking-tighter">
+                Clear Cache
+            </button>
         </div>
-        <div class="text-[9px] text-slate-600 font-bold mono flex items-center gap-2 tracking-widest uppercase">
+        <div class="text-[9px] text-slate-600 font-bold mono flex items-center gap-2 uppercase tracking-widest">
             <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-ping"></span>
-            DietPi-Monitoring-Node
+            DietPi-Node-Bitkub
         </div>
     </div>
 
     <script>
         const numberFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const coinFormatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+
+        // ฟังก์ชัน Hard Reload (CTRL+F5)
+        function hardReload() {
+            if (confirm("ยืนยัน: ล้าง Cache และโหลดหน้าจอใหม่?")) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('t', new Date().getTime()); // บังคับให้ Browser โหลดใหม่ไม่ใช้ Cache
+                window.location.href = url.href;
+            }
+        }
 
         async function fetchStatus() {
             try {
@@ -210,9 +154,9 @@
                 if (!data) return;
 
                 document.getElementById('mode-display').textContent = data.mode;
-                document.getElementById('mode-status-box').className = 'px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ' +
+                document.getElementById('mode-status-box').className = 'px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ' + 
                     (data.mode === 'DRY_RUN' ? 'status-dry-run' : 'status-production');
-
+                
                 document.getElementById('last-run-display').textContent = data.last_run;
                 document.getElementById('eth-price-display').textContent = numberFormatter.format(data.eth_price || 0);
                 document.getElementById('total-value-display').textContent = numberFormatter.format(data.total_value || 0);
@@ -236,7 +180,7 @@
                             </tr>`;
                     });
                 }
-            } catch (error) { console.error('Status Error:', error); }
+            } catch (error) { console.error('Status Error'); }
         }
 
         async function fetchHistory() {
@@ -248,15 +192,14 @@
 
                 if (data.trades && data.trades.length > 0) {
                     data.trades.slice(0, 10).forEach(trade => {
-                        // แยกวันที่และเวลาออกจากกัน
                         const ts = trade.timestamp || "0000-00-00 00:00:00";
                         const parts = ts.includes(' ') ? ts.split(' ') : [ts, ""];
-
+                        
                         tbody.innerHTML += `
                             <tr class="hover:bg-white/5 transition-colors">
                                 <td class="p-2 leading-tight">
-                                    <div class="text-[8px] text-slate-600 italic mb-0.5 font-bold">${parts[0]}</div>
-                                    <div class="text-[10px] text-slate-400 font-bold tracking-tighter">${parts[1]}</div>
+                                    <div class="text-[8px] text-slate-600 italic mb-0.5">${parts[0]}</div>
+                                    <div class="text-[10px] text-slate-400 font-bold">${parts[1]}</div>
                                 </td>
                                 <td class="p-2 font-black ${trade.operation === 'buy' ? 'text-green-500' : 'text-red-500'} uppercase text-[10px]">${trade.operation}</td>
                                 <td class="p-2 text-right font-bold text-slate-300 text-[10px]">
@@ -265,13 +208,13 @@
                             </tr>`;
                     });
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-10 text-slate-700 italic font-bold uppercase text-[10px]">No Logs</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-10 text-slate-700 italic font-bold uppercase text-[10px]">No Active Logs</td></tr>';
                 }
-            } catch (error) { console.error('History Error:', error); }
+            } catch (error) { console.error('History Error'); }
         }
 
         async function toggleMode(newMode) {
-            if (confirm(`Switch to ${newMode.toUpperCase()} mode?`)) {
+            if (confirm(`ยืนยัน: สลับไปโหมด ${newMode.toUpperCase()}?`)) {
                 try {
                     await fetch(`/api/mode/${newMode}`, { method: 'POST' });
                     fetchStatus();
@@ -285,5 +228,4 @@
         fetchHistory();
     </script>
 </body>
-
 </html>
